@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Administrasi Usaha</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+    <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-lg mb-6 p-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">INVOICE</h1>
+                    <p class="text-gray-600">Administrasi Usaha Professional</p>
+                </div>
+                <div class="mt-4 sm:mt-0 text-right">
+                    <div class="text-sm text-gray-600">No. Invoice</div>
+                    <div class="text-xl font-bold text-blue-600" id="invoiceNumber">INV-2024-001</div>
+                </div>
+            </div>
+
+            <!-- Company & Client Info -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <h3 class="font-semibold text-gray-800 mb-3">Dari:</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="font-semibold text-gray-800" contenteditable="true" id="companyName">PT. Administrasi Prima</div>
+                        <div class="text-gray-600 mt-1" contenteditable="true" id="companyAddress">Jl. Bisnis Raya No. 123<br>Jakarta Selatan 12345</div>
+                        <div class="text-gray-600 mt-2" contenteditable="true" id="companyContact">Tel: (021) 1234-5678<br>Email: admin@prima.co.id</div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-800 mb-3">Kepada:</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="font-semibold text-gray-800" contenteditable="true" id="clientName">PT. Klien Sejahtera</div>
+                        <div class="text-gray-600 mt-1" contenteditable="true" id="clientAddress">Jl. Klien Street No. 456<br>Jakarta Pusat 10110</div>
+                        <div class="text-gray-600 mt-2" contenteditable="true" id="clientContact">Tel: (021) 9876-5432<br>Email: finance@klien.co.id</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice Details -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Invoice</label>
+                    <input type="date" id="invoiceDate" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jatuh Tempo</label>
+                    <input type="date" id="dueDate" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="status" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="pending">Menunggu Pembayaran</option>
+                        <option value="paid">Lunas</option>
+                        <option value="overdue">Terlambat</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invoice Items -->
+        <div class="bg-white rounded-lg shadow-lg mb-6 p-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-800 mb-2 sm:mb-0">Detail Layanan</h2>
+                <button onclick="addItem()" class="no-print bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors">
+                    + Tambah Item
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b-2 border-gray-200">
+                            <th class="text-left py-3 px-2 font-semibold text-gray-700">Deskripsi</th>
+                            <th class="text-center py-3 px-2 font-semibold text-gray-700 w-20">Qty</th>
+                            <th class="text-right py-3 px-2 font-semibold text-gray-700 w-32">Harga Satuan</th>
+                            <th class="text-right py-3 px-2 font-semibold text-gray-700 w-32">Total</th>
+                            <th class="no-print w-16"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsTable">
+                        <tr class="border-b border-gray-100">
+                            <td class="py-3 px-2">
+                                <input type="text" value="Layanan Administrasi Bulanan" class="w-full border-none bg-transparent focus:outline-none focus:bg-gray-50 p-1 rounded">
+                            </td>
+                            <td class="py-3 px-2 text-center">
+                                <input type="number" value="1" class="w-full text-center border-none bg-transparent focus:outline-none focus:bg-gray-50 p-1 rounded quantity" onchange="calculateRow(this)">
+                            </td>
+                            <td class="py-3 px-2 text-right">
+                                <input type="number" value="2500000" class="w-full text-right border-none bg-transparent focus:outline-none focus:bg-gray-50 p-1 rounded price" onchange="calculateRow(this)">
+                            </td>
+                            <td class="py-3 px-2 text-right font-semibold total">Rp 2.500.000</td>
+                            <td class="no-print py-3 px-2 text-center">
+                                <button onclick="removeItem(this)" class="text-red-600 hover:text-red-800 transition-colors">🗑️</button>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-100">
+                            <td class="py-3 px-2">
+                                <input type="text" value="Konsultasi Bisnis" class="w-full border-none bg-transparent focus:outline-none focus:bg-gray-50 p-1 rounded">
+                            </td>
+                            <td class="py-3 px-2 text-center">
+                                <input type="number" value="3" class="w-full text-center border-none bg-transparent focus:outline-none focus:bg-gray-50 p-1 rounded quantity" onchange="calculateRow(this)">
+                            </td>
+                            <td class="py-3 px-2 text-right">
+                                <input type="number" value="750000" class="w-full text-right border-none bg-transparent focus:outline-none focus:bg-gray-50 p-1 rounded price" onchange="calculateRow(this)">
+                            </td>
+                            <td class="py-3 px-2 text-right font-semibold total">Rp 2.250.000</td>
+                            <td class="no-print py-3 px-2 text-center">
+                                <button onclick="removeItem(this)" class="text-red-600 hover:text-red-800 transition-colors">🗑️</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Totals -->
+            <div class="mt-6 border-t pt-4">
+                <div class="flex flex-col sm:flex-row justify-end">
+                    <div class="w-full sm:w-80">
+                        <div class="flex justify-between py-2">
+                            <span class="text-gray-600">Subtotal:</span>
+                            <span class="font-semibold" id="subtotal">Rp 4.750.000</span>
+                        </div>
+                        <div class="flex justify-between py-2">
+                            <span class="text-gray-600">PPN (11%):</span>
+                            <span class="font-semibold" id="tax">Rp 522.500</span>
+                        </div>
+                        <div class="flex justify-between py-3 border-t-2 border-gray-200 text-lg">
+                            <span class="font-bold text-gray-800">Total:</span>
+                            <span class="font-bold text-blue-600" id="grandTotal">Rp 5.272.500</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Info -->
+        <div class="bg-white rounded-lg shadow-lg mb-6 p-6">
+            <h3 class="font-semibold text-gray-800 mb-4">Informasi Pembayaran</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-medium text-gray-700 mb-2">Transfer Bank</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="text-sm text-gray-600">Bank BCA</div>
+                        <div class="font-semibold">1234567890</div>
+                        <div class="text-sm text-gray-600">a.n. PT. Administrasi Prima</div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-700 mb-2">Catatan</h4>
+                    <textarea class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-20" placeholder="Tambahkan catatan khusus..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="no-print flex flex-col sm:flex-row gap-4 justify-center">
+            <button onclick="printInvoice()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-md transition-colors font-medium">
+                🖨️ Cetak Invoice
+            </button>
+            <button onclick="generatePDF()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md transition-colors font-medium">
+                📄 Download PDF
+            </button>
+            <button onclick="sendEmail()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-md transition-colors font-medium">
+                📧 Kirim Email
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Set default dates
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const dueDate = new Date(today);
+            dueDate.setDate(today.getDate() + 30);
+            
+            document.getElementById('invoiceDate').value = today.toISOString().split('T')[0];
+            document.getElementById('dueDate').value = dueDate.toISOString().split('T')[0];
+            
+            calculateTotal();
+        });
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function calculateRow(element) {
+            const row = element.closest('tr');
+            const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
+            const price = parseFloat(row.querySelector('.price').value) || 0;
+            const total = quantity * price;
+            
+            row.querySelector('.total').textContent = formatCurrency(total);
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            const rows = document.querySelectorAll('#itemsTable tr');
+            let subtotal = 0;
+            
+            rows.forEach(row => {
+                const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
+                const price = parseFloat(row.querySelector('.price').value) || 0;
+                subtotal += quantity * price;
+            });
+            
+            const tax = subtotal * 0.11;
+            const grandTotal = subtotal + tax;
+            
+            document.getElementById('subtotal').textContent = formatCurrency(subtotal);
+            document.getElementById('tax').textContent = formatCurrency(tax);
+            document.getElementById('grandTotal').textContent = formatCurrency(grandTotal);
+        }
+
+        function addItem() {
+            const tbody = document.getElementById('itemsTable');
+            const newRow = document.createElement('tr');
+            newRow.className = 'border-b border-gray-100';
+            newRow.innerHTML = `
+                <td class="py-3 px-2">
+                    <input type="text" placeholder="Deskripsi layanan..." class="w-full border-none bg-transparent focus:outline-none focus:bg-gray-50 p-1 rounded">
+                </td>
+                <td class="py-3 px-2 text-center">
+                    <input type="number" value="1" class="w-full text-center border-none bg-transparent focus:outline-none focus:bg-gray-50 p-1 rounded quantity" onchange="calculateRow(this)">
+                </td>
+                <td class="py-3 px-2 text-right">
+                    <input type="number" value="0" class="w-full text-right border-none bg-transparent focus:outline-none focus:bg-gray-50 p-1 rounded price" onchange="calculateRow(this)">
+                </td>
+                <td class="py-3 px-2 text-right font-semibold total">Rp 0</td>
+                <td class="no-print py-3 px-2 text-center">
+                    <button onclick="removeItem(this)" class="text-red-600 hover:text-red-800 transition-colors">🗑️</button>
+                </td>
+            `;
+            tbody.appendChild(newRow);
+        }
+
+        function removeItem(button) {
+            const row = button.closest('tr');
+            row.remove();
+            calculateTotal();
+        }
+
+        function printInvoice() {
+            window.print();
+        }
+
+        function generatePDF() {
+            alert('Fitur download PDF akan segera tersedia. Untuk sementara, gunakan fitur cetak dan pilih "Save as PDF".');
+        }
+
+        function sendEmail() {
+            const subject = encodeURIComponent('Invoice ' + document.getElementById('invoiceNumber').textContent);
+            const body = encodeURIComponent('Terlampir invoice untuk pembayaran layanan administrasi usaha.\n\nTerima kasih.');
+            window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+        }
+
+        // Auto-generate invoice number
+        function generateInvoiceNumber() {
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            return `INV-${year}${month}-${random}`;
+        }
+
+        // Update status color
+        document.getElementById('status').addEventListener('change', function() {
+            const status = this.value;
+            const invoiceNumber = document.getElementById('invoiceNumber');
+            
+            invoiceNumber.className = 'text-xl font-bold ';
+            if (status === 'paid') {
+                invoiceNumber.className += 'text-green-600';
+            } else if (status === 'overdue') {
+                invoiceNumber.className += 'text-red-600';
+            } else {
+                invoiceNumber.className += 'text-blue-600';
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98a1831496200fad',t:'MTc1OTcxNTQ2OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
